@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalorienzähler</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#6e6e73;--line:#d2d2d7;--field:#f5f5f7;--accent:#0071e3;--accent-h:#0077ed;--over:#ff9500;--navbg:rgba(245,245,247,.72);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--muted:#86868b;--line:#38383a;--field:#2c2c2e;--accent:#2997ff;--accent-h:#47a6ff;--over:#ff9f0a;--navbg:rgba(0,0,0,.72)}}
+:root[data-theme="dark"]{--bg:#000;--card:#1c1c1e;--text:#f5f5f7;--muted:#86868b;--line:#38383a;--field:#2c2c2e;--accent:#2997ff;--accent-h:#47a6ff;--over:#ff9f0a;--navbg:rgba(0,0,0,.72)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px);-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:-.011em;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navbg);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.gnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--navbg);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.gin{max-width:860px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:6px}
+.brand{font-weight:600;font-size:1.05rem;letter-spacing:-.02em;margin-right:auto}
+.gin .d{font-weight:600;font-size:.95rem;text-align:center;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:620px){.brand{display:none}.gin .d{flex:1}}
+button{font:inherit;letter-spacing:inherit;cursor:pointer;border:0;border-radius:980px;padding:11px 22px;background:var(--field);color:var(--text);transition:background .2s,transform .1s,opacity .2s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);color:#fff;font-weight:500}
+button.primary:hover{background:var(--accent-h)}
+.nb{width:32px;height:32px;padding:0;font-size:1.15rem;line-height:1;display:grid;place-items:center}
+.lnk{background:none;color:var(--accent);padding:6px 6px;font-size:.95rem}
+main{max-width:860px;margin:0 auto;padding:0 16px 56px}
+.hero{padding:56px 0 36px;text-align:center}
+.hero h1{font-size:clamp(2.4rem,8vw,4rem);line-height:1.05;letter-spacing:-.035em;font-weight:700;margin:0 0 14px}
+.grad{background:linear-gradient(90deg,#0071e3,#8e5cf7 55%,#ff375f);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.hero p{font-size:clamp(1.1rem,2.8vw,1.4rem);color:var(--muted);margin:0;letter-spacing:-.015em}
+.card{background:var(--card);border-radius:28px;padding:32px;margin-bottom:16px}
+@media(max-width:560px){.card{padding:22px;border-radius:22px}}
+.card h2{font-size:1.6rem;font-weight:700;letter-spacing:-.025em;margin:0 0 4px;line-height:1.15}
+.card .sub{color:var(--muted);margin:0 0 22px;font-size:1rem}
+.hc{display:flex;align-items:center;justify-content:center;gap:40px}
+@media(max-width:620px){.hc{flex-direction:column;gap:24px;text-align:center}}
+.ringwrap{position:relative;width:230px;height:230px;flex:none}
+.ringsvg{width:100%;height:100%;transform:rotate(-90deg)}
+.track{fill:none;stroke:var(--field);stroke-width:14}
+.ring{fill:none;stroke:var(--accent);stroke-width:14;stroke-linecap:round;stroke-dasharray:527.8;stroke-dashoffset:527.8;transition:stroke-dashoffset .9s cubic-bezier(.3,.7,.2,1),stroke .3s}
+.ring.over{stroke:var(--over)}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.center .v{font-size:3.6rem;font-weight:700;letter-spacing:-.045em;line-height:1}
+.center .u{color:var(--muted);font-size:.85rem;margin-top:6px}
+.remain{font-size:1.6rem;font-weight:600;letter-spacing:-.025em;line-height:1.2;margin:0 0 18px}
+.gi{display:flex;align-items:center;gap:10px;justify-content:inherit}
+.gi input{width:110px}
+.gi span{color:var(--muted)}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.tile{background:var(--card);border-radius:22px;padding:20px 12px;text-align:center}
+.tile b{display:block;font-size:2rem;font-weight:700;letter-spacing:-.035em;line-height:1.1}
+.tile span{font-size:.8rem;color:var(--muted)}
+label{display:block;font-size:.8rem;color:var(--muted);margin:0 0 6px 2px}
+input,select{font:inherit;letter-spacing:inherit;padding:12px 14px;border-radius:12px;border:1px solid transparent;background:var(--field);color:var(--text);min-width:0;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 22%,transparent)}
+.form{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+.form .full{grid-column:1/-1}
+.form .m{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;grid-column:1/-1}
+@media(max-width:480px){.form{grid-template-columns:1fr}.form .m{gap:8px}}
+.pst{color:var(--muted);font-size:.9rem;margin:10px 0 0}
+.rev{margin-top:20px;border-top:1px solid var(--line);padding-top:20px}
+.rev .g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+@media(max-width:480px){.rev .g{grid-template-columns:repeat(2,1fr)}}
+.rev .pst{margin:14px 0}
+.meal{margin-top:22px}
+.meal h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:flex;justify-content:space-between;margin:0 0 4px;font-weight:600}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+li:last-child{border-bottom:0}
+li .t{flex:1;font-weight:500}
+li small{color:var(--muted);display:block;font-size:.8rem;font-weight:400}
+li button{width:28px;height:28px;padding:0;font-size:.75rem;color:var(--muted);display:grid;place-items:center}
+.empty{color:var(--muted)}
+.week{display:flex;gap:10px;align-items:flex-end;height:160px}
+.week .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:.75rem;color:var(--muted);gap:4px}
+.week .b{width:100%;max-width:44px;background:var(--accent);opacity:.3;border-radius:10px;min-height:4px;transition:height .6s cubic-bezier(.3,.7,.2,1)}
+.week .c.sel .b{opacity:1}
+.week .c.sel{color:var(--text);font-weight:600}
+.week .c.over .b{background:var(--over)}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:24px 0 0}
+@media (prefers-reduced-motion:no-preference){.card,.tile{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}@keyframes rise{from{opacity:0;transform:translateY(18px)}}}
+</style>
+</head>
+<body>
+<nav class="gnav"><div class="gin">
+<span class="brand">Kalorienzähler</span>
+<button class="nb" id="prev" aria-label="Voriger Tag">‹</button>
+<div class="d" id="date"></div>
+<button class="nb" id="next" aria-label="Nächster Tag">›</button>
+<button class="lnk" id="today">Heute</button>
+</div></nav>
+
+<main>
+<header class="hero">
+<h1>Dein Tag.<br><span class="grad">Auf einen Blick.</span></h1>
+<p>Mahlzeiten festhalten, Ziel im Blick behalten.</p>
+</header>
+
+<section class="card">
+<div class="hc">
+<div class="ringwrap">
+<svg class="ringsvg" viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="84"/><circle class="ring" id="ring" cx="100" cy="100" r="84"/></svg>
+<div class="center"><span class="v" id="total">0</span><span class="u">kcal gegessen</span></div>
+</div>
+<div>
+<p class="remain" id="remain"></p>
+<label for="goal">Tagesziel</label>
+<div class="gi"><input type="number" id="goal" min="0" step="50" inputmode="numeric"><span>kcal</span></div>
+</div>
+</div>
+</section>
+
+<section class="macros">
+<div class="tile"><b id="mp">0</b><span>Protein · g</span></div>
+<div class="tile"><b id="mc">0</b><span>Kohlenhydrate · g</span></div>
+<div class="tile"><b id="mf">0</b><span>Fett · g</span></div>
+</section>
+
+<section class="card" id="photoCard" style="display:none">
+<h2>Foto-Analyse</h2>
+<p class="sub">Foto aufnehmen, Kalorien schätzen lassen.</p>
+<input type="file" id="photoFile" accept="image/*" hidden>
+<input type="text" id="photoHint" placeholder="Hinweis (optional), z. B. „große Portion“ oder „ohne Sauce“" maxlength="120" style="width:100%;margin-bottom:12px">
+<button class="primary" id="photoBtn" style="width:100%">Essen fotografieren</button>
+<div class="pst" id="photoStatus"></div>
+<div id="photoRes"></div>
+</section>
+
+<section class="card">
+<h2>Eintrag hinzufügen</h2>
+<p class="sub">Trage ein, was du gegessen hast.</p>
+<div class="form">
+<div><label for="name">Lebensmittel</label><input type="text" id="name" maxlength="60" style="width:100%"></div>
+<div><label for="kcal">Kalorien (kcal)</label><input type="number" id="kcal" min="0" inputmode="numeric" style="width:100%"></div>
+<div class="full"><label for="meal">Mahlzeit</label>
+<select id="meal" style="width:100%"><option>Frühstück</option><option>Mittagessen</option><option>Abendessen</option><option>Snacks</option></select></div>
+<div class="m">
+<div><label for="p">Protein (g)</label><input type="number" id="p" min="0" inputmode="decimal" style="width:100%"></div>
+<div><label for="c">Kohlenhydr. (g)</label><input type="number" id="c" min="0" inputmode="decimal" style="width:100%"></div>
+<div><label for="f">Fett (g)</label><input type="number" id="f" min="0" inputmode="decimal" style="width:100%"></div>
+</div>
+<div class="full"><button class="primary" id="add" style="width:100%">Hinzufügen</button></div>
+</div>
+</section>
+
+<section class="card"><h2>Tagebuch</h2><p class="sub">Alles, was du heute gegessen hast.</p><div id="log"></div></section>
+
+<section class="card"><h2>Letzte 7 Tage</h2><p class="sub">Dein Verlauf im Überblick.</p><div class="week" id="week"></div></section>
+
+<footer>Kalorienangaben sind Richtwerte und ersetzen keine ärztliche oder ernährungsfachliche Beratung.</footer>
+</main>
+
+<script>
+var MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
+var data={entries:{},goal:2000};
+try{var s=JSON.parse(localStorage.getItem("kcal-data")||"null");if(s)data=s}catch(e){}
+function save(){try{localStorage.setItem("kcal-data",JSON.stringify(data))}catch(e){}}
+function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function num(v){var n=parseFloat(v);return isNaN(n)||n<0?0:n}
+var cur=new Date();cur.setHours(12,0,0,0);
+function sum(k,f){return (data.entries[k]||[]).reduce(function(a,e){return a+(e[f]||0)},0)}
+function render(){
+ var k=key(cur),g=data.goal||0,t=sum(k,"k");
+ document.getElementById("date").textContent=cur.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
+ document.getElementById("total").textContent=Math.round(t);
+ var gi=document.getElementById("goal");if(document.activeElement!==gi)gi.value=g||"";
+ var ring=document.getElementById("ring"),C=2*Math.PI*84;
+ ring.style.strokeDashoffset=C*(1-(g?Math.min(1,t/g):0));
+ ring.setAttribute("class",g&&t>g?"ring over":"ring");
+ document.getElementById("remain").textContent=g?(t<=g?"Noch "+Math.round(g-t)+" kcal bis zum Ziel":Math.round(t-g)+" kcal über dem Ziel"):"Kein Ziel gesetzt";
+ document.getElementById("mp").textContent=Math.round(sum(k,"p"));
+ document.getElementById("mc").textContent=Math.round(sum(k,"c"));
+ document.getElementById("mf").textContent=Math.round(sum(k,"f"));
+ var all=data.entries[k]||[],h="";
+ MEALS.forEach(function(m){
+  var l=all.filter(function(e){return e.m===m});
+  if(!l.length)return;
+  h+='<div class="meal"><h3><span>'+m+'</span><span>'+Math.round(l.reduce(function(a,e){return a+e.k},0))+' kcal</span></h3><ul>';
+  l.forEach(function(e){
+   var mac=(e.p||e.c||e.f)?'<small>P '+e.p+' g · K '+e.c+' g · F '+e.f+' g</small>':'';
+   h+='<li><span class="t">'+esc(e.n)+mac+'</span><span>'+Math.round(e.k)+' kcal</span><button data-del="'+e.id+'" aria-label="Löschen">✕</button></li>';
+  });
+  h+='</ul></div>';
+ });
+ document.getElementById("log").innerHTML=h||'<div class="empty">Noch keine Einträge für diesen Tag.</div>';
+ var w="",vals=[],i;
+ for(i=6;i>=0;i--){var d=new Date(cur);d.setDate(d.getDate()-i);vals.push({k:key(d),l:d.toLocaleDateString("de-DE",{weekday:"short"}),v:sum(key(d),"k")})}
+ var max=Math.max(g,Math.max.apply(null,vals.map(function(x){return x.v})),1);
+ vals.forEach(function(x){
+  w+='<div class="c'+(x.k===k?' sel':'')+(g&&x.v>g?' over':'')+'"><span>'+Math.round(x.v)+'</span><div class="b" style="height:'+(x.v/max*85)+'%"></div><span>'+x.l+'</span></div>';
+ });
+ document.getElementById("week").innerHTML=w;
+}
+document.getElementById("add").onclick=function(){
+ var n=document.getElementById("name").value.trim(),kc=num(document.getElementById("kcal").value);
+ if(!n||!kc)return;
+ var k=key(cur);
+ (data.entries[k]=data.entries[k]||[]).push({id:Date.now(),n:n,k:kc,m:document.getElementById("meal").value,p:num(document.getElementById("p").value),c:num(document.getElementById("c").value),f:num(document.getElementById("f").value)});
+ ["name","kcal","p","c","f"].forEach(function(id){document.getElementById(id).value=""});
+ save();render();document.getElementById("name").focus();
+};
+document.getElementById("log").addEventListener("click",function(e){
+ var id=e.target.getAttribute("data-del");if(!id)return;
+ var k=key(cur);
+ data.entries[k]=(data.entries[k]||[]).filter(function(x){return String(x.id)!==id});
+ if(!data.entries[k].length)delete data.entries[k];
+ save();render();
+});
+document.getElementById("goal").oninput=function(e){data.goal=num(e.target.value);save();render()};
+function shift(n){cur.setDate(cur.getDate()+n);render()}
+document.getElementById("prev").onclick=function(){shift(-1)};
+document.getElementById("next").onclick=function(){shift(1)};
+document.getElementById("today").onclick=function(){cur=new Date();cur.setHours(12,0,0,0);render()};
+render();
+
+(async function(){
+ var sample=null,lim=null;
+ try{
+  if(typeof claude=="undefined")return;
+  sample=await claude.use("sample");
+  if(!sample)return;
+  lim=await sample.limits();
+ }catch(e){return}
+ if(!lim||!lim.images)return;
+ var card=document.getElementById("photoCard"),file=document.getElementById("photoFile"),btn=document.getElementById("photoBtn"),st=document.getElementById("photoStatus"),res=document.getElementById("photoRes");
+ card.style.display="block";
+ btn.onclick=function(){file.click()};
+ function msg(code){
+  var m={not_granted:"Der Zugriff auf Claude wurde nicht erlaubt.",rate_limited:"Zu viele Anfragen oder Nutzungslimit erreicht. Bitte später erneut versuchen.",image_rejected:"Das Bild konnte nicht verarbeitet werden. Bitte ein anderes Foto wählen.",refused:"Dieses Foto konnte nicht ausgewertet werden.",session_expired:"Bitte melde dich erneut bei Claude an.",invalid_json:"Die Antwort war nicht lesbar. Bitte erneut versuchen."};
+  return m[code]||"Die Analyse hat nicht geklappt. Bitte erneut versuchen.";
+ }
+ file.onchange=async function(){
+  var f=file.files[0];if(!f)return;
+  file.value="";res.innerHTML="";
+  st.textContent="Claude analysiert das Foto …";btn.disabled=true;
+  var hint=document.getElementById("photoHint").value.trim();
+  var prompt="Du bist ein Ernährungsassistent. Schätze anhand des Fotos die Mahlzeit. Antworte ausschließlich mit einem JSON-Objekt in genau diesem Format: {\"gericht\":string,\"kcal\":number,\"protein\":number,\"kohlenhydrate\":number,\"fett\":number,\"hinweis\":string}. Die Zahlen sind gerundete Schätzwerte für die gesamte sichtbare Portion (Gramm für Makros). Im Feld hinweis nennst du in einem kurzen deutschen Satz, worauf die Schätzung beruht oder wie unsicher sie ist. Ist kein Essen erkennbar, setze kcal auf 0 und erkläre es im Feld hinweis."+(hint?" Hinweis der Person: "+hint:"");
+  try{
+   var r=await sample.json(prompt,{images:[f],cache:false});
+   st.textContent="";
+   var kc=Math.round(num(r.kcal));
+   if(!kc){st.textContent=r.hinweis||"Auf dem Foto war kein Essen erkennbar.";return}
+   var h=new Date().getHours(),dm=h<10?0:h<15?1:h<21?2:3,opts="";
+   MEALS.forEach(function(m,i){opts+="<option"+(i==dm?" selected":"")+">"+m+"</option>"});
+   res.innerHTML='<div class="rev"><label for="rn">Erkanntes Gericht</label><input type="text" id="rn" maxlength="60" style="width:100%" value="'+esc(String(r.gericht||"Mahlzeit").slice(0,60))+'"><div class="g">'
+    +'<div><label for="rk">kcal</label><input type="number" id="rk" min="0" style="width:100%" value="'+kc+'"></div>'
+    +'<div><label for="rp">Protein (g)</label><input type="number" id="rp" min="0" style="width:100%" value="'+Math.round(num(r.protein))+'"></div>'
+    +'<div><label for="rc">Kohlenhydr. (g)</label><input type="number" id="rc" min="0" style="width:100%" value="'+Math.round(num(r.kohlenhydrate))+'"></div>'
+    +'<div><label for="rf">Fett (g)</label><input type="number" id="rf" min="0" style="width:100%" value="'+Math.round(num(r.fett))+'"></div></div>'
+    +'<label for="rm">Mahlzeit</label><select id="rm" style="width:100%">'+opts+'</select>'
+    +'<p class="pst">Schätzung, kann abweichen. '+esc(String(r.hinweis||""))+' Du kannst die Werte vor dem Eintragen anpassen.</p>'
+    +'<button class="primary" id="rok" style="width:100%">In den Tag eintragen</button></div>';
+   document.getElementById("rok").onclick=function(){
+    var k=key(cur),n=document.getElementById("rn").value.trim()||"Mahlzeit",v=num(document.getElementById("rk").value);
+    if(!v)return;
+    (data.entries[k]=data.entries[k]||[]).push({id:Date.now(),n:n,k:v,m:document.getElementById("rm").value,p:num(document.getElementById("rp").value),c:num(document.getElementById("rc").value),f:num(document.getElementById("rf").value)});
+    res.innerHTML="";st.textContent="Eingetragen.";
+    save();render();
+   };
+  }catch(e){
+   st.textContent=msg(e&&e.code);
+  }finally{
+   btn.disabled=false;
+  }
+ };
+})();
+</script>
+</body>
+</html>
